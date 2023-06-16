@@ -201,3 +201,63 @@ call Insert_Category(17,'Anime','2016-06-22 19:10:25-07');
 call Insert_Category(18,'Comic','2016-06-22 19:10:25-07');
 
 select * from category;
+
+
+
+
+--------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION category_film_actor() RETURNS VOID AS $$
+DECLARE
+    reg RECORD;
+    cur CURSOR FOR SELECT c.category_id, c.name FROM category c;
+BEGIN
+    OPEN cur;
+    LOOP
+        FETCH cur INTO reg;
+        EXIT WHEN NOT FOUND;
+        RAISE NOTICE '- CATEGORY:  %', reg.name;
+        
+        DECLARE 
+            reg2 RECORD;
+            cur2 CURSOR FOR 
+                SELECT f.film_id, f.title 
+                FROM film f
+                JOIN film_category fc ON fc.film_id = f.film_id
+                WHERE fc.category_id = reg.category_id;
+        
+        BEGIN
+            OPEN cur2;
+            LOOP
+                FETCH cur2 INTO reg2;
+                EXIT WHEN NOT FOUND;
+                RAISE NOTICE '  * FILM:  %', reg2.title;
+                
+                DECLARE 
+                    reg3 RECORD;
+                    cur3 CURSOR FOR 
+                        SELECT a.first_name, a.last_name 
+                        FROM actor a
+                        JOIN film_actor fa ON fa.film_id = reg2.film_id
+                        WHERE fa.actor_id = a.actor_id;
+                    
+                BEGIN
+                    OPEN cur3;
+                    LOOP
+                        FETCH cur3 INTO reg3;
+                        EXIT WHEN NOT FOUND;
+                        RAISE NOTICE '    + ACTOR:  % %', reg3.first_name, reg3.last_name;
+                    END LOOP;
+                    CLOSE cur3;
+                END;
+            END LOOP;
+            CLOSE cur2;
+        END;
+    END LOOP;
+    CLOSE cur;
+    RETURN;
+END;
+$$
+LANGUAGE plpgsql;
+
+select category_film_actor();

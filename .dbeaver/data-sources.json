@@ -1,0 +1,50 @@
+{
+	"folders": {},
+	"connections": {
+		"postgres-jdbc-188c146286b-36eca1c89295bfdb": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "negocios",
+			"save-password": true,
+			"virtual-model-id": "postgres-jdbc-188be17e8bd-db870767080e5d3",
+			"configuration": {
+				"host": "localhost",
+				"port": "5432",
+				"database": "negocios",
+				"url": "jdbc:postgresql://localhost:5432/negocios",
+				"configurationType": "MANUAL",
+				"home": "postgresql-x64-14",
+				"type": "dev",
+				"auth-model": "native"
+			}
+		},
+		"postgres-jdbc-188c1467192-6bd7117a33341668": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "dvdrental",
+			"save-password": true,
+			"virtual-model-id": "postgres-jdbc-1879cd936fc-5878b1908bd55e6e",
+			"configuration": {
+				"host": "localhost",
+				"port": "5432",
+				"database": "dvdrental",
+				"url": "jdbc:postgresql://localhost:5432/dvdrental",
+				"configurationType": "MANUAL",
+				"home": "postgresql-x64-14",
+				"type": "dev",
+				"auth-model": "native"
+			}
+		}
+	},
+	"connection-types": {
+		"dev": {
+			"name": "Development",
+			"color": "255,255,255",
+			"description": "Regular development database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"auto-close-transactions": false
+		}
+	}
+}
