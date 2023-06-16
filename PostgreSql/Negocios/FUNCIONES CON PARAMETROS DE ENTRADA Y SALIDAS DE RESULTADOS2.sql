@@ -139,5 +139,70 @@ select * from obtener_total_pedidos('ALFKI', 1997, 3);
 6. Elabore un programa sql que devuelva en qué pedido, fechas y qué razón social de cliente han
 adquirido un determinado producto.
 */
+select * from ventas.clientes
+select * from ventas.pedidoscabe p order by p.idcliente
+select * from compras.productos p 
+
+select pc.idpedido, pd.idproducto  
+from ventas.pedidoscabe pc 
+join ventas.pedidosdeta pd on pd.idpedido = pc.idpedido
+where pc.idcliente = 'ALFKI'
+group by pc.idpedido, pd.idproducto  
+order by pc.idpedido, pd.idproducto  
 
 
+select p.nomproducto, pc.idpedido, pc.fechapedido, pr.nomproveedor
+    from ventas.pedidoscabe pc
+    join ventas.pedidosdeta pd on pd.idpedido = pc.idpedido
+    join compras.productos p on p.idproducto = pd.idproducto
+    join compras.proveedores pr on pr.idproveedor = p.idproveedor
+    where pc.idcliente = 'ALFKI' and p.idproducto = 5
+    group by pc.idpedido, p.nomproducto, pc.fechapedido, pr.nomproveedor
+
+
+create or replace function obtener_cliente_producto(
+        in c_id ventas.clientes.idcliente%type, in p_id compras.productos.idproducto%type,
+        out p_nombre compras.productos.nomproducto%type, out pc_id ventas.pedidoscabe.idpedido%type, 
+        out pc_fecha ventas.pedidoscabe.fechapedido%type, out pr_razon_social compras.proveedores.nomproveedor%type) 
+    returns setof record as
+    $$
+    declare
+        cur cursor (c_id ventas.clientes.idcliente%type, p_id compras.productos.idproducto%type) 
+            for (
+                select p.nomproducto, pc.idpedido, pc.fechapedido, pr.nomproveedor
+                    from ventas.clientes c
+                    join ventas.pedidoscabe pc on pc.idcliente = c.idcliente
+                    join ventas.pedidosdeta pd on pd.idpedido = pc.idpedido
+                    join compras.productos p on p.idproducto = pd.idproducto
+                    join compras.proveedores pr on pr.idproveedor = p.idproveedor
+                    where c.idcliente = c_id and p.idproducto = p_id
+                    group by pc.idpedido, p.nomproducto, pc.fechapedido, pr.nomproveedor
+        );
+        rec record;
+    begin
+        open cur(c_id,p_id);
+        loop
+            fetch cur into rec;
+            exit when not found;
+
+            p_nombre := rec.nomproducto;
+            pc_id := rec.idpedido;
+            pc_fecha := rec.fechapedido;
+            pr_razon_social := rec.nomproveedor;
+
+            return next;
+        end loop;
+        close cur;
+        return;
+    exception
+        when others then
+            raise notice 'ERROR: %', SQLERRM;
+            return;
+    end 
+    $$ 
+    language 'plpgsql';
+
+select * from obtener_cliente_producto('ALFKI',3);
+select * from obtener_cliente_producto('ALFKI',5);
+select * from obtener_cliente_producto('ALFKI',7);
+select * from obtener_cliente_producto('ALFKI',8);
