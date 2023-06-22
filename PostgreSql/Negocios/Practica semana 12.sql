@@ -7,17 +7,29 @@ select * from ventas.clientes c
 select * from ventas.pedidoscabe p  
 select * from ventas.pedidosdeta p2 
 
+insert into ventas.pedidoscabe values('11079', 'ALFKI', '6', '1998-08-25 00:00:00', '1998-09-22 00:00:00', '1998-09-02 00:00:00', '1', '29', 'Alfreds Futterkiste', 'Obere Str. 57', 'Berlin', '', '12209', 'Alemania');
+insert into ventas.pedidoscabe values('11080', 'ALFKI', '6', '1997-08-26 00:00:00', '1997-09-23 00:00:00', '1997-09-03 00:00:00', '1', '29', 'Alfreds Futterkiste', 'Obere Str. 57', 'Berlin', '', '12209', 'Alemania');
+insert into ventas.pedidoscabe values('11081', 'ALFKI', '6', '1997-08-26 00:00:00', '1997-09-23 00:00:00', '1997-09-03 00:00:00', '1', '29', 'Alfreds Futterkiste', 'Obere Str. 57', 'Berlin', '', '12209', 'Alemania');
+
+
 create or replace function obtener_total_pedidos(inout c_id ventas.clientes.idcliente%type, 
-    in p_anio int, in p_trimestre int, out pedidos int, out precio_total float) returns record as
+    in p_anio int, in p_trimestre int, out pedidos int, out precio_total float) 
+returns record as
 $$
 begin
-	select count(p.idpedido), sum(pd.cantidad*(pd.preciounidad - (pd.preciounidad*descuento))) 
-        from ventas.clientes c 
-	    into pedidos, precio_total
-	    join ventas.pedidoscabe p on p.idcliente = c.idcliente
-	    join ventas.pedidosdeta pd on pd.idpedido = p.idpedido 
-	    where c.idcliente = c_id and extract(year from p.fechapedido) = p_anio
-	        and extract(quarter from p.fechapedido) = p_trimestre;
+    select (
+        select count(pc) from ventas.pedidoscabe pc
+        where pc.idcliente = c_id and EXTRACT(year FROM pc.fechapedido) = p_anio
+            and EXTRACT(quarter FROM pc.fechapedido) = p_trimestre
+            ),
+            sum(pd.cantidad * (pd.preciounidad - (pd.preciounidad * pd.descuento)))
+        from ventas.pedidoscabe p
+        into pedidos, precio_total
+        join ventas.pedidosdeta pd ON pd.idpedido = p.idpedido
+        where p.idcliente = c_id
+            and EXTRACT(year from p.fechapedido) = p_anio
+            and EXTRACT(quarter from p.fechapedido) = p_trimestre
+        group by p.idpedido;
 
 exception
     when others then

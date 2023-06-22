@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diagram version="1" name="ER-Diagram">
+	<entities>
+		<data-source id="postgres-jdbc-188c146286b-36eca1c89295bfdb">
+			<entity id="1" name="categorias" fq-name="compras.categorias">
+				<path name="compras"/>
+				<path name="negocios"/>
+			</entity>
+			<entity id="2" name="productos" fq-name="compras.productos">
+				<path name="compras"/>
+				<path name="negocios"/>
+			</entity>
+			<entity id="3" name="proveedores" fq-name="compras.proveedores">
+				<path name="compras"/>
+				<path name="negocios"/>
+			</entity>
+			<entity id="4" name="cargos" fq-name="rrhh.cargos">
+				<path name="rrhh"/>
+				<path name="negocios"/>
+			</entity>
+			<entity id="5" name="distritos" fq-name="rrhh.distritos">
+				<path name="rrhh"/>
+				<path name="negocios"/>
+			</entity>
+			<entity id="6" name="empleados" fq-name="rrhh.empleados">
+				<path name="rrhh"/>
+				<path name="negocios"/>
+			</entity>
+			<entity id="7" name="clientes" fq-name="ventas.clientes">
+				<path name="ventas"/>
+				<path name="negocios"/>
+			</entity>
+			<entity id="8" name="paises" fq-name="ventas.paises">
+				<path name="ventas"/>
+				<path name="negocios"/>
+			</entity>
+			<entity id="9" name="pedidoscabe" fq-name="ventas.pedidoscabe">
+				<path name="ventas"/>
+				<path name="negocios"/>
+			</entity>
+			<entity id="10" name="pedidosdeta" fq-name="ventas.pedidosdeta">
+				<path name="ventas"/>
+				<path name="negocios"/>
+			</entity>
+		</data-source>
+	</entities>
+	<relations>
+		<relation name="productos_idcateria_fkey" fq-name="compras.productos.productos_idcateria_fkey" type="fk" pk-ref="1" fk-ref="2"/>
+		<relation name="pedidosdeta_idproducto_fkey" fq-name="ventas.pedidosdeta.pedidosdeta_idproducto_fkey" type="fk" pk-ref="2" fk-ref="10"/>
+		<relation name="productos_idproveedor_fkey" fq-name="compras.productos.productos_idproveedor_fkey" type="fk" pk-ref="3" fk-ref="2"/>
+		<relation name="empleados_idcargo_fkey" fq-name="rrhh.empleados.empleados_idcargo_fkey" type="fk" pk-ref="4" fk-ref="6"/>
+		<relation name="empleados_iddistrito_fkey" fq-name="rrhh.empleados.empleados_iddistrito_fkey" type="fk" pk-ref="5" fk-ref="6"/>
+		<relation name="pedidoscabe_idempleado_fkey" fq-name="ventas.pedidoscabe.pedidoscabe_idempleado_fkey" type="fk" pk-ref="6" fk-ref="9"/>
+		<relation name="pedidoscabe_idcliente_fkey" fq-name="ventas.pedidoscabe.pedidoscabe_idcliente_fkey" type="fk" pk-ref="7" fk-ref="9"/>
+		<relation name="proveedores_idpais_fkey" fq-name="compras.proveedores.proveedores_idpais_fkey" type="fk" pk-ref="8" fk-ref="3"/>
+		<relation name="clientes_idpais_fkey" fq-name="ventas.clientes.clientes_idpais_fkey" type="fk" pk-ref="8" fk-ref="7"/>
+		<relation name="pedidosdeta_idpedido_fkey" fq-name="ventas.pedidosdeta.pedidosdeta_idpedido_fkey" type="fk" pk-ref="9" fk-ref="10"/>
+	</relations>
+</diagram>

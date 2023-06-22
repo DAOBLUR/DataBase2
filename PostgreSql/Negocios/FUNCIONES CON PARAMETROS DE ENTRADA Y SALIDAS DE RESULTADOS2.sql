@@ -101,7 +101,15 @@ select p.idpedido, count(pd)
 	    join ventas.pedidosdeta pd on pd.idpedido = p.idpedido 
 	    group by p.idpedido 
 	    
+select p.*--, count(p)
+        from ventas.pedidoscabe p 
+	    where p.idcliente = 'ALFKI' and extract(year from p.fechapedido) = 1997
+	        and extract(quarter from p.fechapedido) = 3
 
+
+select pd.* from ventas.pedidosdeta pd 
+	where pd.idpedido = 10643
+	    
 select count(pd), sum(pd.cantidad*(pd.preciounidad - (pd.preciounidad*descuento))) 
         from ventas.pedidoscabe p 
 	    join ventas.pedidosdeta pd on pd.idpedido = p.idpedido 
@@ -131,8 +139,6 @@ $$
 language 'plpgsql';
 
 select * from obtener_total_ordenes('ALFKI', 1997, 3);
-
-select * from obtener_total_pedidos('ALFKI', 1997, 3);
 
 
 /*
