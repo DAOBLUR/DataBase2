@@ -80,9 +80,6 @@ GROUP BY 1, 2, 3, 4, 6, 7, 8
 ORDER BY table_schema, table_name;
 
 
-
-
-
 /*
 5. La empresa necesita modificar las reglas de negocio donde se nos pide
 */
@@ -128,7 +125,7 @@ call rrhh.Actualizar_Bonificacion(1,200);
 call rrhh.Actualizar_Bonificacion(2,2000);
 
 ------iv. Asignación familiar ( 102.5 a los trabajadores que tienen hijos menores de 18 años)
-
+/*
 select c.nombrecateria, c.descripcion  from compras.categorias c
 
 select * from rrhh.distritos
@@ -136,6 +133,7 @@ select * from rrhh.empleados
 select * from rrhh.cargos
 select * from rrhh.Hijos
 select * from ventas.pedidosdeta
+*/
 
 alter table rrhh.empleados add column bonificacion float;
 
@@ -258,17 +256,40 @@ create table auditoria.historico_empleados (
 	nomempleado varchar(50) not null,
 	fecnac timestamp not null,
 	dirempleado varchar(60) not null,
-	iddistrito int4 null,
+	iddistrito int4 null references rrhh.distritos(iddistrito),
 	fonoempleado varchar(15) null,
-	idcargo int4 null,
+	idcargo int4 null references rrhh.cargos,
 	feccontrata timestamp not null,
-	bonificación float8 null,
-	bonificacion float8 null,
 	sueldo_base float8 null,
-	constraint empleados_pkey primary key (idempleado),
-	constraint empleados_idcargo_fkey foreign key (idcargo) references rrhh.cargos(idcargo),
-	constraint empleados_iddistrito_fkey foreign key (iddistrito) references rrhh.distritos(iddistrito)
+    log_movimiento  VARCHAR(10),
+    log_fecha_mov   timestamp
 );
+
+CREATE OR REPLACE FUNCTION auditoria.tg_historico_empleados() RETURNS TRIGGER AS
+$BODY$
+BEGIN
+    IF (TG_OP='INSERT' OR TG_OP='UPDATE') THEN
+        INSERT INTO auditoria.historico_empleados VALUES 
+        (new.idempleado, new.apeempleado, new.nomempleado, new.fecnac, new.dirempleado, new.iddistrito, 
+            new.fonoempleado, new.idcargo, new.feccontrata, new.sueldo_base, TG_OP, CURRENT_TIMESTAMP);
+        RETURN new;
+    END IF;
+
+    IF (TG_OP='DELETE') THEN
+        INSERT INTO auditoria.historico_empleados VALUES
+        (old.idempleado, old.apeempleado, old.nomempleado, old.fecnac, old.dirempleado, old.iddistrito, 
+            old.fonoempleado, old.idcargo, old.feccontrata, old.sueldo_base, TG_OP, CURRENT_TIMESTAMP);
+    RETURN old;
+    END IF;
+END;
+$BODY$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER tg_historico_empleados AFTER INSERT OR UPDATE OR DELETE
+ON rrhh.empleados FOR EACH ROW EXECUTE PROCEDURE auditoria.tg_historico_empleados();
+
+select * from rrhh.empleados
+
+INSERT INTO RRHH.empleados VALUES(109, 'NameEx', 'ApeEx', '1969-07-02 00:00:00', 'Av',3,'98877888',1,'2011-07-10',0,0);
 
 /*
 7. Se debe conectar la base de datos a un lenguaje de programación y una de las siguientes
@@ -371,15 +392,5 @@ select * from obtener_proveedor_productos(2);
 8. Crear una tarea automática para realizar la copia de seguridad de las bases de datos
 de negocios después de los cambios programando todos los días a las 10 pm. 
 */
---"C:\Program Files\PostgreSQL\13\bin\pg_dump.exe" -U postgres -d negocios -f "E:\universidad\semester6\DatabaseII\PostgreSql\Negocios\ev4\backup.sql"
 
-
-
-
-/*
-5. La empresa necesita modificar las reglas de negocio donde se nos pide:
-*/
-
---Porcentaje de Comisión por ventas depende de la antigüedad del 
---trabajador y el cargo permiten el cálculo del monto de comisión
---Monto de comisión: total vendido en el mes * % comisión
+--"E:\Program Files\PostgreSQL\13\bin\pg_dump.exe" -U postgres -d negocios -f "E:\universidad\semester6\DatabaseII\PostgreSql\Negocios\ev4\backup.sql"
