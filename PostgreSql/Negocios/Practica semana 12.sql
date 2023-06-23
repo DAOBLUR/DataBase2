@@ -299,3 +299,46 @@ language plpgsql;
 
 select mostrar_empleado_comision(1,10);
 select mostrar_empleado_comision(10,10);
+
+--------------------------
+
+create or replace function obtener_cargo_empleado() 
+returns void as 
+$$
+declare
+    cur_cargos cursor for ( select * from rrhh.cargos );
+    rec_cargos record;
+begin
+    open cur_cargos;
+    loop
+        fetch cur_cargos into rec_cargos;
+        exit when not found;
+        raise notice '* CARGO: % , %', rec_cargos.idcargo, rec_cargos.descargo;
+
+        declare
+            cur_empleados cursor for ( select e.idempleado, e.apeempleado, e.nomempleado 
+                from rrhh.empleados e where e.idcargo = rec_cargos.idcargo
+            );
+            rec_empleados record;
+        begin
+            open cur_empleados;
+            loop
+                fetch cur_empleados into rec_empleados;
+                exit when not found;
+                raise notice '  + EMPLEADO: % , % %', 
+                    rec_empleados.idempleado, rec_empleados.nomempleado, rec_empleados.apeempleado;
+            end loop;
+            close cur_empleados;
+        end;
+    end loop;
+    close cur_cargos;
+    return;
+exception
+    when others then
+        raise notice 'ERROR: %', SQLERRM;
+        return;
+end;
+$$
+LANGUAGE plpgsql;
+
+select obtener_cargo_empleado();
